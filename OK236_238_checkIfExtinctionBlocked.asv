@@ -1,0 +1,142 @@
+%% establish record of what sessions are what
+% 236 is col 1, 238 is col 2
+sessions.mice = {'OK236', 'OK238'};
+sessions.extTest{1,1} = '200219';
+sessions.extTest{1,2} = '200219';
+
+temp = {'200209'; '200210'; '200211'; '200212'; ...
+    '200213'; '200214'; '200215'; '200216'; '200217'; '200218'};
+sessions.lasBlockCR = populateCell(temp,{},1);
+
+temp = {'200209'; '200210'; '200211'; '200212'; ...
+    '200213'; '200214'; '200215'; '200216'; '200217'; '200218'};
+sessions.lasBlockCR = populateCell(temp,sessions.lasBlockCR,2);
+
+sessions.blockExtBL = populateCell({'200207'; '200208'},{},1);
+sessions.blockExtBL = populateCell({'200207'; '200208'},sessions.blockExtBL,2);
+
+temp = {'200123'; '200124'; '200125'; '200126'; '200127';...
+    '200128'; '200129'; '200130'; '200131'; '200201'};
+sessions.unpExt = populateCell(temp,{},1);
+
+temp = {'200131'; '200201'; '200202'; '200203'; '200204';...
+    '200205'; '200206'; '200207'; '200208'; '200209'};
+sessions.unpExt = populateCell(temp,sessions.unpExt,2);
+
+sessions.unpExtBL = populateCell({'200120'; '200122'},{},1); % need to check if backup failed for 200121
+sessions.unpExtBL = populateCell({'200129'; '200130'},sessions.unpExtBL,2);
+
+%% plot data for OK236 alone
+% plot CR amplitude and traces across sessions for extinction & extinction
+% plus laser
+mouseidx = 1;
+
+plotExtVsBlockExtData(sessions, trials, mouseidx)
+
+basedir = ['\\blinklab\data\users\okim\behavior\', sessions.mice{1,mouseidx}, '\'];
+
+[normalExtinction.cradjamp, normalExtinction.traces, normalExtinction.session]...
+    = fetchAndConcatData(trials, basedir, sessions.unpExtBL, mouse, 0,...
+    [], [], []);
+[normalExtinction.cradjamp, normalExtinction.traces, normalExtinction.session]...
+    = fetchAndConcatData(trials, basedir, sessions.unpExt, mouse, 2,...
+    normalExtinction.cradjamp, normalExtinction.traces, normalExtinction.session);
+
+[blockExtinction.cradjamp, blockExtinction.traces, blockExtinction.session]...
+    = fetchAndConcatData(trials, basedir, sessions.blockExtBL, mouse, 0,...
+    [], [], []);
+[blockExtinction.cradjamp, blockExtinction.traces, blockExtinction.session]...
+    = fetchAndConcatData(trials, basedir, sessions.lasBlockCR, mouse, 2,...
+    blockExtinction.cradjamp, blockExtinction.traces, blockExtinction.session);
+[blockExtinction.cradjamp, blockExtinction.traces, blockExtinction.session]...
+    = fetchAndConcatData(trials, basedir, sessions.extTest, mouse, 12,...
+    blockExtinction.cradjamp, blockExtinction.traces, blockExtinction.session);
+
+
+figure
+subplot(4,1,1)
+hold on
+startHere = 1;
+sessnums = unique(normalExtinction.session);
+for i = 1:max(sessnums)
+    thisSession = sessnums(i,1);
+    theseVals = normalExtinction.cradjamp(normalExtinction.session==thisSession,1);
+    if i<3
+        scatter(startHere:(startHere+length(theseVals)-1), theseVals, 3, 'MarkerFaceColor', [0 0 0], 'MarkerEdgeColor', [0 0 0])
+    else
+        scatter(startHere:(startHere+length(theseVals)-1), theseVals, 3, 'MarkerFaceColor', [0 0 1], 'MarkerEdgeColor', [0 0 1])
+    end
+    startHere = startHere+length(theseVals);
+    plot([startHere-0.5 startHere-0.5], [0 1], 'Color', [0 0 0], 'LineStyle', ':')
+end
+set(gca, 'TickDir', 'out')
+xlim([0 1300])
+ylim([0 1])
+ylabel('CR Adj Amp')
+title(sessions.mice{1,mouseidx})
+
+subplot(4,1,2)
+hold on
+startHere = 0;
+sessnums = unique(normalExtinction.session);
+for i = 1:max(sessnums)
+    thisSession = sessnums(i,1);
+    meanTrace = mean(normalExtinction.traces(normalExtinction.session==thisSession,:));
+    if i<3
+        colorrgb = [0 0 0];
+    else
+        colorrgb = [0 0 1];
+    end
+    plot(startHere:(startHere+50), meanTrace(1,40:90), 'Color', colorrgb)
+    startHere = startHere+51;
+    plot([startHere-0.5 startHere-0.5], [0 1], 'Color', [0 0 0], 'LineStyle', ':')
+end
+set(gca, 'TickDir', 'out')
+xlim([0 startHere+51])
+ylim([0 1])
+ylabel('FEC')
+
+subplot(4,1,3)
+hold on
+startHere = 1;
+sessnums = unique(blockExtinction.session);
+for i = 1:max(sessnums)
+    thisSession = sessnums(i,1);
+    theseVals = blockExtinction.cradjamp(blockExtinction.session==thisSession,1);
+    if i<3
+        scatter(startHere:(startHere+length(theseVals)-1), theseVals, 3, 'MarkerFaceColor', [0 0 0], 'MarkerEdgeColor', [0 0 0])
+    elseif i<13
+        scatter(startHere:(startHere+length(theseVals)-1), theseVals, 3, 'MarkerFaceColor', [0 0 1], 'MarkerEdgeColor', [0 0 1])
+    else
+        scatter(startHere:(startHere+length(theseVals)-1), theseVals, 3, 'MarkerFaceColor', [0 0 0], 'MarkerEdgeColor', [0 0 0])
+    end
+    startHere = startHere+length(theseVals);
+    plot([startHere-0.5 startHere-0.5], [0 1], 'Color', [0 0 0], 'LineStyle', ':')
+end
+set(gca, 'TickDir', 'out')
+xlim([0 1300])
+ylim([0 1])
+ylabel('CR Adj Amp')
+
+subplot(4,1,4)
+hold on
+startHere = 0;
+sessnums = unique(blockExtinction.session);
+for i = 1:max(sessnums)
+    thisSession = sessnums(i,1);
+    meanTrace = mean(blockExtinction.traces(blockExtinction.session==thisSession,:));
+    if i<3
+        colorrgb = [0 0 0];
+    elseif i<13
+        colorrgb = [0 0 1];
+    else
+        colorrgb = [0 0 0];
+    end
+    plot(startHere:(startHere+50), meanTrace(1,40:90), 'Color', colorrgb)
+    startHere = startHere+51;
+    plot([startHere-0.5 startHere-0.5], [0 1], 'Color', [0 0 0], 'LineStyle', ':')
+end
+set(gca, 'TickDir', 'out')
+xlim([0 startHere])
+ylim([0 1])
+ylabel('FEC')
