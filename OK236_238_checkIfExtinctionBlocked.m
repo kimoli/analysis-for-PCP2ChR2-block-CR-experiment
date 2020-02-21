@@ -1,8 +1,13 @@
 %% establish record of what sessions are what
 % 236 is col 1, 238 is col 2
 sessions.mice = {'OK236', 'OK238'};
-sessions.extTest{1,1} = '200219';
-sessions.extTest{1,2} = '200219';
+
+temp = {'200219'; '200220'};
+sessions.extTest = populateCell(temp,{},1);
+
+temp = {'200219'; '200220'};
+sessions.extTest = populateCell(temp,sessions.extTest,2);
+
 
 temp = {'200209'; '200210'; '200211'; '200212'; ...
     '200213'; '200214'; '200215'; '200216'; '200217'; '200218'};
@@ -29,7 +34,7 @@ sessions.unpExtBL = populateCell({'200120'; '200120'},sessions.unpExtBL,2);
 %% plot data for each mouse alone
 % plot CR amplitude and traces across sessions for extinction & extinction
 % plus laser
-plotExtVsBlockExtData(sessions, trials, 1)
-plotExtVsBlockExtData(sessions, trials, 2)
+plotExtVsBlockExtData(sessions, 1)
+plotExtVsBlockExtData(sessions, 2)
 
 
